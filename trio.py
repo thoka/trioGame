@@ -15,7 +15,7 @@ nchip = {
     9: 4,
 }
 
-N=71
+N=92
 
 chips = []
 for c in sorted(nchip.keys()):
@@ -48,7 +48,7 @@ def get_trio_positions(reverse=True,n = 7):
 
     return [p for p in all_xy()]    
 
-p = get_trio_positions()
+trio_positions = get_trio_positions()
 
 def filter(p, res):
     return (
@@ -74,15 +74,19 @@ def rows(chips=chips):
 
 def write_solutions(f):
     res = []
-    for r in range(0,N):
-        i = set([ info(s,r+1) for s in summary[r] ])
+    for r in range(1,N+1):
+        i = set([info(s,r) for s in summary[r] ])
         i = ",".join(i)
-        f.write(f'{r+1}:{i}\n')
+        f.write(f'{r}:{i}\n')
 
-def solutions(res):
-    return [p for p in p if filter(p, res)]
+def solutions():
+    res = defaultdict(list)
+    for p in trio_positions:
+        a,b,c = chips[p[0].i], chips[p[1].i], chips[p[2].i]
+        res[a*b+c].append(p)
+        res[a*b-c].append(p)
 
-
+    return res
 
 stats = [0]*N
 
@@ -90,6 +94,7 @@ missing_stats = defaultdict(int)
 missing_count_stats = defaultdict(int)
 
 def write_stats():
+    return
     with open(f'{N}-stats.dat','w') as f:
         for i in range(0,N):
             f.write(f'{i+1} {stats[i]}\n')
@@ -104,9 +109,11 @@ runs = 0
 while True:
     runs+=1
     shuffle(chips)
-    summary = [solutions(res) for res in range(1,N+1)]
-    sol_count = [len(s) for s in summary]
+    summary = solutions()
+    sol_count = [len(summary[i]) for i in range(1,N+1)]
     missing = 0
+    last_non_missing = 0
+
     for i in range(0,N):
         stats[i] += sol_count[i]
         if sol_count[i] == 0:
@@ -114,13 +121,27 @@ while True:
             missing += 1
     missing_count_stats[missing] += 1
 
+    for i in range(0,N):
+        if sol_count[i] == 0:
+            last_non_missing = i
+            break
+    if last_non_missing < 80: 
+        continue
+
     min_sol = min(sol_count)  
 
     if runs%100 == 0:
         # print(stats)
         write_stats()            
 
-    if min_sol>0: 
+    if last_non_missing >= 75: 
+
+        unique_solutions = [  len(set([info(s,r) for s in summary[r] ])) for r in range(1,N+1) ]
+        min_count = min(unique_solutions[0:last_non_missing])
+
+        if last_non_missing < 80:
+            if min_count < 2:
+                continue
 
         # write report
 
@@ -146,10 +167,13 @@ while True:
 
         name = sorted(names)[0]    
 
-        fn = f"{N}--{'-'.join(rows(name))}.txt"
+        fn = f"{last_non_missing}-{min_count}--{'-'.join(rows(name))}.txt"
         with open(fn,'w') as f: 
             write_grid(f)
             write_solutions(f)
+
+
+    if min_sol>0: 
 
         N += 1
 
