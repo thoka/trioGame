@@ -2,6 +2,7 @@ from collections import defaultdict
 from pprint import pprint
 from random import shuffle
 import numpy as np
+import time
 
 nchip = {
     1: 5,
@@ -16,6 +17,7 @@ nchip = {
 }
 
 N=92
+NRUNS = 100000
 
 chips = []
 for c in sorted(nchip.keys()):
@@ -94,7 +96,7 @@ missing_stats = defaultdict(int)
 missing_count_stats = defaultdict(int)
 
 def write_stats():
-    return
+    # print(".",end="",flush=True)
     with open(f'{N}-stats.dat','w') as f:
         for i in range(0,N):
             f.write(f'{i+1} {stats[i]}\n')
@@ -106,6 +108,9 @@ def write_stats():
             f.write(f'{i} {missing_count_stats[i]}\n')
 
 runs = 0
+
+lasttime = time.perf_counter_ns()
+
 while True:
     runs+=1
     shuffle(chips)
@@ -125,14 +130,19 @@ while True:
         if sol_count[i] == 0:
             last_non_missing = i
             break
-    if last_non_missing < 80: 
+
+    if runs%NRUNS == 0:
+        # print(stats)
+        write_stats()            
+        last = lasttime
+        lasttime = time.perf_counter_ns()
+        print(f'{(lasttime-last)/NRUNS/1000:0.1f} µs per run')
+
+    if last_non_missing < 81: 
         continue
 
     min_sol = min(sol_count)  
 
-    if runs%100 == 0:
-        # print(stats)
-        write_stats()            
 
     if last_non_missing >= 75: 
 
