@@ -135,19 +135,21 @@ function* all_tripples(n=7, reverse = true) {
 
   for (let x = 0; x < n; x++) {
     for (let y = 0; y < n; y++) {
-      if (x < n - 3) {
+      if (x <= n - 3) {
         yield [i(x, y), i(x + 1, y), i(x + 2, y)];
         if (reverse) yield [i(x + 2, y), i(x + 1, y), i(x, y)];
       }
 
-      if (y < n - 3) {
+      if (y <= n - 3) {
         yield [i(x, y), i(x, y + 1), i(x, y + 2)];
         if (reverse) yield [i(x, y + 2), i(x, y + 1), i(x, y)];
       }
 
-      if (x < n - 3 && y < n - 3) {
+      if ( (x <= n - 3) && (y <= n - 3) ) {
         yield [i(x, y), i(x + 1, y + 1), i(x + 2, y + 2)];
         if (reverse) yield [i(x + 2, y + 2), i(x + 1, y + 1), i(x, y)];
+        yield [i(x+2, y), i(x + 1, y + 1), i(x, y + 2)];
+        if (reverse) yield [i(x, y + 2), i(x + 1, y + 1), i(x+2, y)];
       }
     }
   }
@@ -166,6 +168,7 @@ function possible_results(chips) {
 
     function add_solution(res, info, triplet)
     {
+        console.log(res,info,triplet)
         if (info in solutions[res]) {
             // do not add 
             return
@@ -178,14 +181,15 @@ function possible_results(chips) {
     for (let i = 0; i < triplets.length; i++) {
         let [a, b, c] = triplets[i]
         let [A, B, C] = [ chips[a], chips[b], chips[c] ]
-        add_solution(A*B+C, '${A}*${B}+{C}', [a, b, c])
-        if (C<A*B) add_solution(A*B-C, '${A}*${B}-{C}', [a, b, c])
+        add_solution(A*B+C, `${A}*${B}+${C}`, [a, b, c])
+        if (C<A*B) add_solution(A*B-C, `${A}*${B}-${C}`, [a, b, c])
     }
     return [counter, solutions]
 }
 
 
 function init_puzzle(q) {
+    // q = q || "3711655-8866321-8394764-4998495-8599734-7221762-6123545"
     q = q || "1478348-7489512-5656995-7167999-3228342-8611453-5662473"
     q = q.replace(/-/g, '')
     // create chips

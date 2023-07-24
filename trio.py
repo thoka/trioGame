@@ -10,18 +10,18 @@ gc.enable()
 
 nchip = {
     1: 5,
-    2: 5, # 6
-    3: 5, #6 
+    2: 6, # 6
+    3: 6, #6 
     4: 6,
     5: 6,
     6: 6,
     7: 5,
     8: 5,
-    9: 6, # 4
+    9: 4, # 4
 }
 
 N=92
-MIN=50
+MIN=88
 NRUNS = 500000
 
 chips = []
@@ -37,17 +37,20 @@ def get_trio_positions(reverse=True,n = 7):
     def all_xy():   
         for x in range(0, n):
             for y in range(0,n):
-                if x<n-3: 
+                if x<=n-3: 
                     yield ( i(x,y), i(x+1,y), i(x+2,y) )
                     if reverse: yield ( i(x+2,y),   i(x+1,y)   , i(x,y) )
-                if y<n-3: 
+                if y<=n-3: 
                     yield ( i(x,y), i(x,y+1)   , i(x,y+2) )
                     if reverse:
                         yield ( i(x,y+2),   i(x,y+1)   , i(x,y) )
-                if x<n-3 and y<n-3:
+                if x<=n-3 and y<=n-3:
                     yield ( i(x,y), i(x+1,y+1) , i(x+2,y+2) )
                     if reverse:
                        yield ( i(x+2,y+2), i(x+1,y+1) , i(x,y) )
+                    yield ( i(x+2,y), i(x+1,y+1) , i(x,y+2) )
+                    if reverse:
+                       yield ( i(x,y+2), i(x+1,y+1) , i(x+2,y) )
 
     return [p for p in all_xy()]    
 
@@ -162,7 +165,7 @@ while True:
         print()
         print(gc_stats)
 
-        if single_run_time > 10:
+        if single_run_time > 15:
             print("too slow, exiting")
             exit()
         
