@@ -1,0 +1,257 @@
+<html>
+<head>
+<title>Home</title>
+</head>
+<body>
+
+<style>
+
+body { cursor: crosshair; user-select: none; }
+
+
+.L {
+  float: left;
+  display: grid;
+  width: 600px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-gap: 10px;
+  /* background-color: #e4e4e4; */
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.L > div {
+  background-color: #e5eff7;
+  color: black;
+  font-size: 3em;
+  font-weight: 900;
+  padding: 5px;
+  border-radius: 25px;
+  text-align: center;
+  border: 10px solid yellow;
+}
+
+.L > div.o {
+  background-color: #f8e0e0;
+}
+
+.L > div.d1 {  border-color: red; }    
+.L > div.d2 {  border-color: rgb(251, 255, 2); }
+.L > div.d3 {  border-color: orange; }
+.L > div.d4 {  border-color: green; }
+.L > div.d5 {  border-color: blue; }
+.L > div.d6 {  border-color: purple; }
+.L > div.d7 {  border-color: pink; }
+.L > div.d8 {  border-color: brown; }
+.L > div.d9 {  border-color: gray; }
+
+.R {
+  width: 600px;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-gap: 10px;
+  /* background-color: #e4e4e4; */
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.R div {
+  display: inline-block;
+  position: relative;
+  background-color: blue;
+  color: white;
+  font-size: 3em;
+  font-weight: 900;
+  padding: 2px;
+  border-radius: 25px;
+  text-align: center;
+  border: 2px solid black;
+  cursor: grab;
+}
+
+.R div div {
+  position: absolute;  bottom: -5; right: -5;
+  color: white; background-color: green;
+
+  font-size: 15px; font-weight: 900;
+  padding: 0px;
+  border-radius: 15px;
+  text-align: center;
+  border: 2px solid black;
+  width: 20px;
+  height: 20px;
+  cursor: help;
+}
+
+.R div div.n0 { background-color: red; display:none}    
+.R div div.n1 { background-color: darkgreen; }    
+.R div div.n2 { background-color: green; }    
+.R div div.n3 { background-color: rgb(86, 189, 2); }    
+.R div div.n4 { background-color: rgb(103, 165, 2); }    
+.R div div.n5 { background-color: rgb(188, 191, 0); }    
+
+body {
+  background-color: black;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+</style>
+
+<script>
+
+function rand(max) {
+  // generate random number between 0 and max  
+  return Math.floor(Math.random() * (max+1))
+}
+
+// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+function shuffle(array) {
+  let currentIndex = array.length,  randomIndex;
+
+  // While there remain elements to shuffle.
+  while (currentIndex != 0) {
+
+    // Pick a remaining element.
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]];
+  }
+
+  return array;
+}
+
+function* all_tripples(n=7, reverse = true) {
+
+  function i(x, y) {
+    return x+n*y
+  }
+
+  for (let x = 0; x < n; x++) {
+    for (let y = 0; y < n; y++) {
+      if (x < n - 3) {
+        yield [i(x, y), i(x + 1, y), i(x + 2, y)];
+        if (reverse) yield [i(x + 2, y), i(x + 1, y), i(x, y)];
+      }
+
+      if (y < n - 3) {
+        yield [i(x, y), i(x, y + 1), i(x, y + 2)];
+        if (reverse) yield [i(x, y + 2), i(x, y + 1), i(x, y)];
+      }
+
+      if (x < n - 3 && y < n - 3) {
+        yield [i(x, y), i(x + 1, y + 1), i(x + 2, y + 2)];
+        if (reverse) yield [i(x + 2, y + 2), i(x + 1, y + 1), i(x, y)];
+      }
+    }
+  }
+}
+
+const triplets = [...all_tripples()]
+
+function possible_results(chips) {
+    counter = {}
+    solutions = {}
+    
+    for (let i = 0; i <= 90; i++) {
+        counter[i] = 0
+        solutions[i] = {}
+    }
+
+    function add_solution(res, info, triplet)
+    {
+        if (info in solutions[res]) {
+            // do not add 
+            return
+        } else {
+            solutions[res][info] = triplet
+            counter[res] += 1
+        }
+    }
+
+    for (let i = 0; i < triplets.length; i++) {
+        let [a, b, c] = triplets[i]
+        let [A, B, C] = [ chips[a], chips[b], chips[c] ]
+        add_solution(A*B+C, '${A}*${B}+{C}', [a, b, c])
+        if (C<A*B) add_solution(A*B-C, '${A}*${B}-{C}', [a, b, c])
+    }
+    return [counter, solutions]
+}
+
+function create_items(q) {
+    q = q.replace(/-/g, '')
+    let target = document.querySelector('.L')
+
+    // create chips
+    chips = []
+    for (let i = 0; i < q.length; i++) {
+        const gridItem = document.createElement('div')
+        // convert q to int
+        n = parseInt(q[i])
+        chips.push(n)
+        if (n % 2 == 1) {
+            gridItem.classList.add('o')
+        }
+        gridItem.classList.add('d'+q[i])
+        
+        gridItem.textContent = q[i]
+        target.appendChild(gridItem);
+    }
+
+    // create results
+    let [nres,solutions] = possible_results(chips)
+    target = document.querySelector('.R')
+    for (let i = 1; i <= 90; i++) {
+        const gridItem = document.createElement('div')
+        const sub = document.createElement('div')
+        sub.classList.add('n'+nres[i])
+        sub.textContent = nres[i]
+        sub.dataset.solutions = solutions[i] // JSON.stringify(solutions[i])
+        gridItem.textContent = i
+        gridItem.appendChild(sub)
+        target.appendChild(gridItem);
+    }
+}
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+      const gridItems = document.querySelectorAll('.L > div');
+  
+      // Function to get the URL query parameter by name
+      function getQueryParam(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+      }
+
+      create_items(getQueryParam("q"))
+
+      gridItems.forEach((item) => {
+        const content = item.textContent.trim();
+        const queryValue = getQueryParam(`item${content}`);
+  
+        if (queryValue) {
+          item.textContent = queryValue;
+        }
+      });
+
+    });
+  </script>
+
+<div>
+<div class="L">
+</div>
+</div>
+
+<div>
+<div class="R">
+</div>
+</div>
+
+<div class="I">
+</div>
+
+</body>
+</html>
