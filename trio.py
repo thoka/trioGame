@@ -4,49 +4,50 @@ from random import shuffle
 import numpy as np
 import time
 
+import gc
+gc.enable() 
+
+
 nchip = {
     1: 5,
-    2: 6,
-    3: 6,
+    2: 5, # 6
+    3: 5, #6 
     4: 6,
     5: 6,
     6: 6,
     7: 5,
     8: 5,
-    9: 4,
+    9: 6, # 4
 }
 
 N=92
-NRUNS = 100000
+MIN=50
+NRUNS = 500000
 
 chips = []
 for c in sorted(nchip.keys()):
     chips.extend([c]*nchip[c])  
 
+
 def get_trio_positions(reverse=True,n = 7):
 
-    class i:
-        def __init__(i,x,y):
-            assert x>=0 and x<n
-            assert y>=0 and y<n
-            i.x,i.y,i.i = x,y,x+y*7
-        def __repr__(i):
-            return repr( (i.x,i.y,i.i) )
-
+    def i(x,y):
+        return x+y*7
+    
     def all_xy():   
         for x in range(0, n):
             for y in range(0,n):
                 if x<n-3: 
-                    yield [ i(x,y), i(x+1,y), i(x+2,y) ]
-                    if reverse: yield [ i(x+2,y),   i(x+1,y)   , i(x,y) ]
+                    yield ( i(x,y), i(x+1,y), i(x+2,y) )
+                    if reverse: yield ( i(x+2,y),   i(x+1,y)   , i(x,y) )
                 if y<n-3: 
-                    yield [ i(x,y), i(x,y+1)   , i(x,y+2) ]
+                    yield ( i(x,y), i(x,y+1)   , i(x,y+2) )
                     if reverse:
-                        yield [ i(x,y+2),   i(x,y+1)   , i(x,y) ]
+                        yield ( i(x,y+2),   i(x,y+1)   , i(x,y) )
                 if x<n-3 and y<n-3:
-                    yield [ i(x,y), i(x+1,y+1) , i(x+2,y+2) ]
+                    yield ( i(x,y), i(x+1,y+1) , i(x+2,y+2) )
                     if reverse:
-                       yield [ i(x+2,y+2), i(x+1,y+1) , i(x,y) ]
+                       yield ( i(x+2,y+2), i(x+1,y+1) , i(x,y) )
 
     return [p for p in all_xy()]    
 
@@ -54,11 +55,11 @@ trio_positions = get_trio_positions()
 
 def filter(p, res):
     return (
-        abs( res - (chips[p[0].i]*chips[p[1].i]) )  == chips[p[2].i]
+        abs( res - (chips[p[0]]*chips[p[1]]) )  == chips[p[2]]
     )
 
 def info(p,res):
-    a,b,c = chips[p[0].i], chips[p[1].i], chips[p[2].i]
+    a,b,c = chips[p[0]], chips[p[1]], chips[p[2]]
     if a*b+c == res:
         return f'{a}*{b}+{c}'
     else:   
@@ -84,11 +85,24 @@ def write_solutions(f):
 def solutions():
     res = defaultdict(list)
     for p in trio_positions:
-        a,b,c = chips[p[0].i], chips[p[1].i], chips[p[2].i]
+        a,b,c = chips[p[0]], chips[p[1]], chips[p[2]]
         res[a*b+c].append(p)
         res[a*b-c].append(p)
-
     return res
+
+sol_count = [0]*100
+
+def solutions_counter():
+    # reuising the same array is faster than creating a new one
+    for i in range(0,N+1):
+        sol_count[i] = 0
+    counter = sol_count
+    # counter = defaultdict(int)
+    for p in trio_positions:
+        a,b,c = chips[p[0]], chips[p[1]], chips[p[2]]
+        counter[a*b+c] +=1
+        counter[a*b-c] +=1 
+    return counter
 
 stats = [0]*N
 
@@ -96,6 +110,7 @@ missing_stats = defaultdict(int)
 missing_count_stats = defaultdict(int)
 
 def write_stats():
+    return
     # print(".",end="",flush=True)
     with open(f'{N}-stats.dat','w') as f:
         for i in range(0,N):
@@ -114,43 +129,60 @@ lasttime = time.perf_counter_ns()
 while True:
     runs+=1
     shuffle(chips)
-    summary = solutions()
-    sol_count = [len(summary[i]) for i in range(1,N+1)]
+    sol_count = solutions_counter()
+
     missing = 0
     last_non_missing = 0
 
-    for i in range(0,N):
-        stats[i] += sol_count[i]
+    for i in range(1,N+1):
+        stats[i-1] += sol_count[i]
         if sol_count[i] == 0:
-            missing_stats[i] += 1
+            missing_stats[i-1] += 1
             missing += 1
+
     missing_count_stats[missing] += 1
 
-    for i in range(0,N):
+    for i in range(1,N+1):
         if sol_count[i] == 0:
-            last_non_missing = i
+            last_non_missing = i-1
             break
-
+    
     if runs%NRUNS == 0:
         # print(stats)
+        #print(chr(27) + "[2J")
+        print("\033c", end="")
         write_stats()            
         last = lasttime
         lasttime = time.perf_counter_ns()
-        print(f'{(lasttime-last)/NRUNS/1000:0.1f} µs per run')
+        single_run_time = (lasttime-last)/NRUNS/1000
+        print(f'{single_run_time:0.1f} µs per run')
 
-    if last_non_missing < 81: 
+        gc_stats = gc.get_stats(True)
+
+        print()
+        print(gc_stats)
+
+        if single_run_time > 10:
+            print("too slow, exiting")
+            exit()
+        
+
+    if last_non_missing < MIN: 
         continue
 
-    min_sol = min(sol_count)  
+    else: 
 
-
-    if last_non_missing >= 75: 
+        summary = solutions()
 
         unique_solutions = [  len(set([info(s,r) for s in summary[r] ])) for r in range(1,N+1) ]
         min_count = min(unique_solutions[0:last_non_missing])
+        
+        if min_count < 1: 
+            # this should never happen (but it does)
+            continue
 
-        if last_non_missing < 80:
-            if min_count < 2:
+        if last_non_missing < 86:
+            if min_count < 3:
                 continue
 
         # write report
@@ -182,17 +214,6 @@ while True:
             write_grid(f)
             write_solutions(f)
 
-
-    if min_sol>0: 
-
-        N += 1
-
-        stats = [0]*N
-
-        missing_stats = defaultdict(int)
-        missing_count_stats = defaultdict(int)
-
-        # pprint(summary)
 
 
 
