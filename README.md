@@ -6,9 +6,9 @@ trio.py searches for puzzles with solutions for as many as possible results.
 
 index.html visualises a random choosen puzzle.
 
-There are presets with solutions for 1 to 90 and presets with at least 3 solutions for 1 to 30.
+There are presets with solutions for 1 to 90 and presets with at least 3 solutions for 1 to 50.
 
-Play it at https://thoka.github.com/trioGame
+Play it at https://thoka.github.io/trioGame
 
 ## Instructions
 
