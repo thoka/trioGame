@@ -1,6 +1,7 @@
 <html>
 <head>
-<title>Home</title>
+<title>𐄏trioGame</title>
+<script src="presets.js"></script>
 </head>
 <body>
 
@@ -8,17 +9,18 @@
 
 body { cursor: crosshair; user-select: none; color: white;}
 
+#app { 
+   display: grid;
+   grid-template-columns:  10fr 1fr 10fr 1fr;
+}
 
 .L {
-  float: left;
-  display: grid;
-  width: 600px;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-gap: 10px;
-  /* background-color: #e4e4e4; */
+  background-color: black;
   padding: 20px;
-  border-radius: 10px;
+  width: 100%;
 }
 
 .L > div {
@@ -36,6 +38,18 @@ body { cursor: crosshair; user-select: none; color: white;}
   background-color: #f8e0e0;
 }
 
+.L > div.highlight {
+  border-color: white !important;
+  color: white !important;
+  background-color: black !important;
+}
+
+.L > div.highlight2 {
+  border-color: white !important;
+  color: white !important;
+  background-color: gray !important;
+}
+
 .L > div.d1 {  border-color: red; }    
 .L > div.d2 {  border-color: rgb(251, 255, 2); }
 .L > div.d3 {  border-color: orange; }
@@ -47,13 +61,11 @@ body { cursor: crosshair; user-select: none; color: white;}
 .L > div.d9 {  border-color: gray; }
 
 .R {
-  width: 600px;
+  width: 100%;
   display: grid;
   grid-template-columns: repeat(10, 1fr);
   grid-gap: 10px;
-  /* background-color: #e4e4e4; */
   padding: 20px;
-  border-radius: 10px;
 }
 
 .R div {
@@ -61,7 +73,7 @@ body { cursor: crosshair; user-select: none; color: white;}
   position: relative;
   background-color: blue;
   color: white;
-  font-size: 3em;
+  font-size: 2.5em;
   font-weight: 900;
   padding: 2px;
   border-radius: 25px;
@@ -72,7 +84,7 @@ body { cursor: crosshair; user-select: none; color: white;}
 
 .R div div {
   position: absolute;  bottom: -5; right: -5;
-  color: white; background-color: green;
+  color: white; background-color: rgb(188, 191, 0);
 
   font-size: 15px; font-weight: 900;
   padding: 0px;
@@ -84,12 +96,12 @@ body { cursor: crosshair; user-select: none; color: white;}
   cursor: help;
 }
 
+
 .R div div.n0 { background-color: red; display:none}    
 .R div div.n1 { background-color: darkgreen; }    
 .R div div.n2 { background-color: green; }    
 .R div div.n3 { background-color: rgb(86, 189, 2); }    
 .R div div.n4 { background-color: rgb(103, 165, 2); }    
-.R div div.n5 { background-color: rgb(188, 191, 0); }    
 
 body {
   background-color: black;
@@ -168,7 +180,6 @@ function possible_results(chips) {
 
     function add_solution(res, info, triplet)
     {
-        console.log(res,info,triplet)
         if (info in solutions[res]) {
             // do not add 
             return
@@ -188,9 +199,12 @@ function possible_results(chips) {
 }
 
 
+function choose_preset() {
+    return presets[rand(presets.length-1)]
+}
+
 function init_puzzle(q) {
-    // q = q || "3711655-8866321-8394764-4998495-8599734-7221762-6123545"
-    q = q || "1478348-7489512-5656995-7167999-3228342-8611453-5662473"
+    q = q || choose_preset()
     q = q.replace(/-/g, '')
     // create chips
     chips = []
@@ -205,6 +219,14 @@ function clear(element) {
     }
 }
 
+function solutions_list(solutions) {
+    let res = []
+    for (let s in solutions) {
+        res.push(solutions[s])
+    }
+    return res
+}
+
 function redraw() {
     let target = document.querySelector('.L')
     clear(target)
@@ -215,6 +237,7 @@ function redraw() {
             gridItem.classList.add('o')
         }
         gridItem.classList.add('d'+n)
+        gridItem.classList.add('p'+i)
         
         gridItem.textContent = n
         target.appendChild(gridItem);
@@ -228,9 +251,27 @@ function redraw() {
         const sub = document.createElement('div')
         sub.classList.add('n'+nres[i])
         sub.textContent = nres[i]
-        sub.dataset.solutions = solutions[i] // JSON.stringify(solutions[i])
+        sub.dataset.solutions = JSON.stringify(solutions_list(solutions[i]))
         gridItem.textContent = i
         gridItem.appendChild(sub)
+        gridItem.addEventListener('click', function (event) {
+            // clear previous hint
+            document.querySelectorAll('.highlight').forEach
+              ( (e) => e.classList.remove("highlight") )  
+            document.querySelectorAll('.highlight2').forEach
+              ( (e) => e.classList.remove("highlight2") )  
+
+            // get and rotate solutions  
+            const solutions = JSON.parse(event.target.dataset.solutions)
+            const s = solutions.shift()
+            solutions.push(s)
+            event.target.dataset.solutions = JSON.stringify(solutions)
+
+            // highlight solution
+            document.querySelector('.p'+s[0]).classList.add("highlight")
+            document.querySelector('.p'+s[1]).classList.add("highlight")
+            document.querySelector('.p'+s[2]).classList.add("highlight2")
+        })
         target.appendChild(gridItem);
     }
 }
@@ -251,14 +292,15 @@ document.addEventListener('DOMContentLoaded', function () {
 })
 </script>
 
+<div id="app">
 <div class="L"></div>
-<div class="R"></div>
 <div class="I"></div>
+<div class="R"></div>
+</div>
 
 <footer>
 <a href="https://github.com/thoka/trioGame" target="_blank">
 <img src="github-mark-white.png" alt="GitHub" class="github-logo"> thoka/trioGame</a>
 </footer>
-
 </body>
 </html>
