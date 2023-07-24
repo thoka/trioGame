@@ -6,7 +6,7 @@
 
 <style>
 
-body { cursor: crosshair; user-select: none; }
+body { cursor: crosshair; user-select: none; color: white;}
 
 
 .L {
@@ -96,6 +96,9 @@ body {
   grid-template-columns: repeat(3, 1fr);
 }
 
+footer { text-align: right;}
+footer > a { color: white; text-decoration: none; }
+.github-logo  { height: 1em; vertical-align: text-bottom; cursor: pointer; }
 </style>
 
 <script>
@@ -181,29 +184,41 @@ function possible_results(chips) {
     return [counter, solutions]
 }
 
-function create_items(q) {
-    q = q.replace(/-/g, '')
-    let target = document.querySelector('.L')
 
+function init_puzzle(q) {
+    q = q || "1478348-7489512-5656995-7167999-3228342-8611453-5662473"
+    q = q.replace(/-/g, '')
     // create chips
     chips = []
     for (let i = 0; i < q.length; i++) {
+        chips.push(parseInt(q[i]))
+    }
+}
+
+function clear(element) {
+    while (element.firstChild) {
+        element.removeChild(element.firstChild)
+    }
+}
+
+function redraw() {
+    let target = document.querySelector('.L')
+    clear(target)
+    for (let i = 0; i < chips.length; i++) {
         const gridItem = document.createElement('div')
-        // convert q to int
-        n = parseInt(q[i])
-        chips.push(n)
+        n = chips[i]
         if (n % 2 == 1) {
             gridItem.classList.add('o')
         }
-        gridItem.classList.add('d'+q[i])
+        gridItem.classList.add('d'+n)
         
-        gridItem.textContent = q[i]
+        gridItem.textContent = n
         target.appendChild(gridItem);
     }
 
-    // create results
     let [nres,solutions] = possible_results(chips)
     target = document.querySelector('.R')
+    clear(target)
     for (let i = 1; i <= 90; i++) {
         const gridItem = document.createElement('div')
         const sub = document.createElement('div')
@@ -216,42 +231,30 @@ function create_items(q) {
     }
 }
 
-    document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
 
-      const gridItems = document.querySelectorAll('.L > div');
-  
-      // Function to get the URL query parameter by name
-      function getQueryParam(name) {
+    const gridItems = document.querySelectorAll('.L > div');
+
+    function getQueryParam(name) {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(name);
-      }
+    }
 
-      create_items(getQueryParam("q"))
+    init_puzzle(getQueryParam("q"))
+    redraw()
+    // shuffle(chips)
+    // redraw()
+})
+</script>
 
-      gridItems.forEach((item) => {
-        const content = item.textContent.trim();
-        const queryValue = getQueryParam(`item${content}`);
-  
-        if (queryValue) {
-          item.textContent = queryValue;
-        }
-      });
+<div class="L"></div>
+<div class="R"></div>
+<div class="I"></div>
 
-    });
-  </script>
-
-<div>
-<div class="L">
-</div>
-</div>
-
-<div>
-<div class="R">
-</div>
-</div>
-
-<div class="I">
-</div>
+<footer>
+<a href="https://github.com/thoka/trioGame" target="_blank">
+<img src="github-mark-white.png" alt="GitHub" class="github-logo"> thoka/trioGame</a>
+</footer>
 
 </body>
 </html>
