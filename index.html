@@ -9,18 +9,22 @@
 
 body { cursor: crosshair; user-select: none; color: white;}
 
-#app { 
+@media all and (orientation: landscape) {
+    #app { 
    display: grid;
    grid-template-columns:  10fr 1fr 10fr 1fr;
 }
+
+}
+
 
 .L {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-gap: 10px;
-  background-color: black;
   padding: 20px;
-  width: 100%;
+  margin-right: 100px;
+  width:  95%;
 }
 
 .L > div {
@@ -61,7 +65,7 @@ body { cursor: crosshair; user-select: none; color: white;}
 .L > div.d9 {  border-color: gray; }
 
 .R {
-  width: 100%;
+  width: 95%;
   display: grid;
   grid-template-columns: repeat(10, 1fr);
   grid-gap: 10px;
