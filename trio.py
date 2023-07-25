@@ -8,21 +8,13 @@ import gc
 gc.enable() 
 
 
-nchip = {
-    1: 5,
-    2: 6, # 6
-    3: 6, #6 
-    4: 6,
-    5: 6,
-    6: 6,
-    7: 5,
-    8: 5,
-    9: 4, # 4
-}
+nchip = { 1:5, 2:6, 3:6, 4:6, 5:6, 6:6, 7:5, 8:5, 9:4 } 
 
-N=92
-MIN=88
-NRUNS = 500000
+N=92 #  search up to 
+MIN=50
+MIN_MULTIPLE=3
+NRUNS = 200000
+MAX_RUNTIME = 15 # µs per run
 
 chips = []
 for c in sorted(nchip.keys()):
@@ -90,13 +82,13 @@ def solutions():
     for p in trio_positions:
         a,b,c = chips[p[0]], chips[p[1]], chips[p[2]]
         res[a*b+c].append(p)
-        res[a*b-c].append(p)
+        if a*b>c: res[a*b-c].append(p)
     return res
 
 sol_count = [0]*100
 
 def solutions_counter():
-    # reuising the same array is faster than creating a new one
+    # reusing the same array is faster than creating a new one
     for i in range(0,N+1):
         sol_count[i] = 0
     counter = sol_count
@@ -151,21 +143,19 @@ while True:
             break
     
     if runs%NRUNS == 0:
-        # print(stats)
-        #print(chr(27) + "[2J")
-        print("\033c", end="")
+        # print("\033c", end="")
         write_stats()            
         last = lasttime
         lasttime = time.perf_counter_ns()
         single_run_time = (lasttime-last)/NRUNS/1000
         print(f'{single_run_time:0.1f} µs per run')
 
-        gc_stats = gc.get_stats(True)
+        # gc_stats = gc.get_stats(True)
 
-        print()
-        print(gc_stats)
+        # print()
+        # print(gc_stats)
 
-        if single_run_time > 15:
+        if single_run_time > MAX_RUNTIME:
             print("too slow, exiting")
             exit()
         
@@ -177,16 +167,15 @@ while True:
 
         summary = solutions()
 
-        unique_solutions = [  len(set([info(s,r) for s in summary[r] ])) for r in range(1,N+1) ]
+        unique_solutions = [ len(set([info(s,r) for s in summary[r] ])) for r in range(1,N+1) ]
         min_count = min(unique_solutions[0:last_non_missing])
         
         if min_count < 1: 
             # this should never happen (but it does)
             continue
 
-        if last_non_missing < 86:
-            if min_count < 3:
-                continue
+        if min_count < MIN_MULTIPLE:
+            continue
 
         # write report
 
@@ -212,11 +201,12 @@ while True:
 
         name = sorted(names)[0]    
 
-        fn = f"{last_non_missing}-{min_count}--{'-'.join(rows(name))}.txt"
-        with open(fn,'w') as f: 
-            write_grid(f)
-            write_solutions(f)
-
+        fn = f"{last_non_missing}-{min_count}.txt"
+        with open(fn,'a') as f: 
+            f.write('"')
+            f.write('-'.join(rows(name)))
+            f.write('",')
+            f.write("\n")
 
 
 
