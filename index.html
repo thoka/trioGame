@@ -10,32 +10,43 @@
 body { cursor: crosshair; user-select: none; color: white;}
 
 @media all and (orientation: landscape) {
-    #app { 
+#app { 
    display: grid;
-   grid-template-columns:  10fr 1fr 10fr 1fr;
+   grid-template-columns:  20fr 1fr 20fr;
+}
 }
 
+@media all and (orientation: portrait) {
+#app { 
+   display: grid;
+   grid-template-rows:  20fr 1fr 20fr;
 }
+
+.R { grid-area: 3/1;}
+}
+
 
 
 .L {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  grid-gap: 10px;
-  padding: 20px;
-  margin-right: 100px;
-  width:  95%;
+  grid-gap: 1vmin;
+  padding: 0vmin;
+  width:  100%;
 }
 
 .L > div {
   background-color: #e5eff7;
   color: black;
-  font-size: 3em;
+  font-size: 6.5vmin;
   font-weight: 900;
-  padding: 5px;
-  border-radius: 25px;
+  padding: 0;
+  margin: 0.3vmin;
+  border-radius: 2vmin;
   text-align: center;
-  border: 10px solid yellow;
+  xborder: 1vmin solid yellow;
+  xwidth: 7vmin;
+  xheight: 7vmin;
 }
 
 .L > div.o {
@@ -54,22 +65,22 @@ body { cursor: crosshair; user-select: none; color: white;}
   background-color: gray !important;
 }
 
-.L > div.d1 {  border-color: red; }    
-.L > div.d2 {  border-color: rgb(251, 255, 2); }
-.L > div.d3 {  border-color: orange; }
-.L > div.d4 {  border-color: green; }
-.L > div.d5 {  border-color: blue; }
-.L > div.d6 {  border-color: purple; }
-.L > div.d7 {  border-color: pink; }
-.L > div.d8 {  border-color: brown; }
-.L > div.d9 {  border-color: gray; }
+.L > div.d1 {  background-color: red; }    
+.L > div.d2 {  background-color: rgb(251, 255, 2); }
+.L > div.d3 {  background-color: orange; }
+.L > div.d4 {  background-color: green; }
+.L > div.d5 {  background-color: blue; }
+.L > div.d6 {  background-color: purple; }
+.L > div.d7 {  background-color: pink; }
+.L > div.d8 {  background-color: brown; }
+.L > div.d9 {  background-color: gray; }
 
 .R {
-  width: 95%;
+  width: 100%;
   display: grid;
   grid-template-columns: repeat(10, 1fr);
-  grid-gap: 10px;
-  padding: 20px;
+  xgrid-gap: 10px;
+  xpadding: 20px;
 }
 
 .R div {
@@ -77,26 +88,27 @@ body { cursor: crosshair; user-select: none; color: white;}
   position: relative;
   background-color: blue;
   color: white;
-  font-size: 2.5em;
+  font-size: 5vmin;
   font-weight: 900;
-  padding: 2px;
-  border-radius: 25px;
+  width: 7vmin;
+  height: 7vmin;
+  vertical-align: middle; 
+  border-radius: 5vmin;
   text-align: center;
-  border: 2px solid black;
   cursor: grab;
 }
 
 .R div div {
-  position: absolute;  bottom: -5; right: -5;
+  position: absolute;  bottom: -1vmin; right: -1vmin;
   color: white; background-color: rgb(188, 191, 0);
-
-  font-size: 15px; font-weight: 900;
+  vertical-align: bottom; 
+  font-size: 3vmin; font-weight: 900;
   padding: 0px;
-  border-radius: 15px;
+  border-radius: 2vmin;
   text-align: center;
   border: 2px solid black;
-  width: 20px;
-  height: 20px;
+  width: 4vmin;
+  height: 4vmin;
   cursor: help;
 }
 
